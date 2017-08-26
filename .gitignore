@@ -1,2 +1,4 @@
 # All executables
-	test
+test
+*.out
+

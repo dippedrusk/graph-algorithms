@@ -58,11 +58,13 @@ int main(void)
 
   getParameters();
 
+  printf("Printing nodes:\n");
   for (int i = 0; i < N; i++)
   {
     printf("%s\n", node_list[i]);
   }
 
+  printf("Printing edges:\n");
   for (int i = 0; i < N; i++)
   {
     for (int j = 0; j < N; j++)
@@ -72,6 +74,7 @@ int main(void)
     printf("\n");
   }
 
+  // Didn't forget to free shit this time!
   for (int i = 0; i < N; i++)
   {
     free(node_list[i]);
@@ -102,7 +105,7 @@ void getParameters()
     }
   } while (!scanf_ret);
 
-  int max_edges = (N * (N-1)) / 2;
+  int max_edges = (N * (N-1)) / 2; // CHANGE THIS: depends on directedness (*2 for directed)
 
   do
   {
@@ -120,27 +123,38 @@ void getParameters()
     }
   } while (!scanf_ret);
 
-  printf("\n\n\n");
-  printf("Pay no attention to everything after this.");
-  printf("\n\n\n");
-
-  N = 3;
-  M = 6;
-
+  // Allocating edges and nodes dynamically
   int edge_matrix_size = N*N;
   edge_matrix = (int *) malloc(edge_matrix_size * sizeof(int));
   assert(edge_matrix);
   node_list = (char **) malloc(N * sizeof(char*));
   assert(node_list);
-
   for (int i = 0; i < N; i++)
   {
     node_list[i] = (char *) malloc(32 * sizeof(char));
     assert(node_list[i]);
-    strcpy(node_list[i], "banana\0");
+  }
+
+  printf("Type in names for your %d nodes (maximum 31 characters, no spaces).\n", N);
+
+  /*
+  GARBAGE CODE:
+  */
+  getchar(); // Probably a code smell? Flushing out the last \n before using fgets
+  for (int i = 0; i < N; i++)
+  {
+    printf("Node %d: ", i+1);
+    assert(fgets(excess_buffer, 32, stdin) != NULL); // input to buffer
+    memcpy(node_list[i], excess_buffer, 32 * sizeof(char)); // trying to copy 32 characters over
+    node_list[i][strcspn(node_list[i], "\n")] = 0; // replacing /n from fgets with /0
+  }
+  // Code works with non-newline whitespace. Still don't know how to deal with buffer overflows.
+
+  for (int i = 0; i < N; i++)
+  {
     for (int j = 0; j < N; j++)
     {
-      edge_matrix[i*N +j] = -1;
+      edge_matrix[i*N +j] = (M == max_edges) ? 1 : -1;
     }
   }
 }
