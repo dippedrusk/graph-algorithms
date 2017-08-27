@@ -9,10 +9,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <ctype.h>
 #include <math.h>
 
 #define BUFFER_SIZE 0xFFF
 #define MAX_NUMBER_NODES 0xFF
+#define MAX_EDGE_WEIGHT 0xFF
 #define NODE_NAME_MAX_LENGTH 32
 
 int N, M;
@@ -23,11 +25,10 @@ int directed, weighted, scanf_ret, excessscanf_ret;
 
 void getParameters(void);
 int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype);
-void getInputString(char * message, unsigned int max_size, char * string_ptr);
+bool getInputString(char * message, unsigned int max_size, char * string_ptr);
 
 int main(void)
 {
-  char excess_buffer [BUFFER_SIZE];
   printf("Welcome to dijkstra.c!\n");
 
   directed = getInputInt("For an undirected graph, type 0. For a directed graph, type 1.", 0, 1, "options");
@@ -76,7 +77,7 @@ void getParameters()
 
   int max_edges = (directed) ? (N * (N-1)) : ((N * (N-1))/2) ;
 
-  M = getInputInt("Type in the number of nodes in the graph.", 0, max_edges, "range");
+  M = getInputInt("Type in the number of edges in the graph.", 0, max_edges, "range");
 
   // Allocating edges and nodes dynamically
   int edge_matrix_size = N*N;
@@ -90,19 +91,30 @@ void getParameters()
     assert(node_list[i]);
   }
 
-  printf("Type in names for your %d nodes (maximum 31 characters, no spaces).\n", N);
-
-  /*
-  GARBAGE CODE (to be fixed):
-  */
+  char message_buffer [BUFFER_SIZE];
+  printf("Type in names for your %d nodes.\n", N);
   for (int i = 0; i < N; i++)
   {
-    printf("Node %d: ", i+1);
-    assert(fgets(excess_buffer, 32, stdin) != NULL); // input to buffer
-    memcpy(node_list[i], excess_buffer, 32 * sizeof(char)); // trying to copy 32 characters over
-    node_list[i][strcspn(node_list[i], "\n")] = 0; // replacing /n from fgets with /0
+    bool unique;
+    do
+    {
+      unique = true;
+      sprintf(message_buffer, "Node %d:", i+1);
+      int noNames = getInputString(message_buffer, NODE_NAME_MAX_LENGTH, node_list[i]);
+      if (noNames)
+      {
+        sprintf(node_list[i], "%d", i+1);
+      }
+      for (int j = 0; j < i; j++)
+      {
+        if (strcmp(node_list[i], node_list[j]) == 0)
+        {
+          printf("This node name has already been used for node %d. Try again.\n", j+1);
+          unique = false;
+        }
+      }
+    } while(!unique);
   }
-  // Code works with non-newline whitespace. Still don't know how to deal with buffer overflows.
 
   for (int i = 0; i < N; i++)
   {
@@ -115,8 +127,10 @@ void getParameters()
 
 int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype)
 {
-  char input_buffer [BUFFER_SIZE];
-  char excess_buffer [BUFFER_SIZE];
+  char * input_buffer = malloc(BUFFER_SIZE * sizeof(char));
+  assert(input_buffer);
+  char * excess_buffer = malloc(BUFFER_SIZE * sizeof(char));
+  assert(excess_buffer);
   bool validInput = false;
 
   // - ignore all whitespace
@@ -130,7 +144,7 @@ int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype
   do
 	{
     printf("%s ", message);
-    assert(fgets(input_buffer, 32, stdin) != NULL); // input to buffer
+    assert(fgets(input_buffer, BUFFER_SIZE, stdin) != NULL); // input to buffer
     int sscanf_ret = sscanf(input_buffer, "%u%s", &ret, excess_buffer);
     switch (sscanf_ret)
     {
@@ -160,10 +174,58 @@ int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype
     }
 	} while (!validInput);
 
+  free(input_buffer);
+  free(excess_buffer);
   return ret;
 }
 
-void getInputString(char * message, unsigned int max_size, char * string_ptr)
+bool getInputString(char * message, unsigned int max_size, char * string_ptr)
 {
-  // input_buffer[strcspn(input_buffer, "\n")] = 0; // replacing /n from fgets with /0
+  char * input_buffer = malloc(BUFFER_SIZE * sizeof(char));
+  assert(input_buffer);
+  char * excess_buffer = malloc(BUFFER_SIZE * sizeof(char));
+  assert(excess_buffer);
+  bool validInput = false;
+  bool noNames = false;
+
+  // - ignore all whitespace
+  // - lower case entire string
+  // - no input -> default (handle later)
+  // - within bounds
+
+  do
+	{
+    printf("%s ", message);
+    assert(fgets(input_buffer, BUFFER_SIZE, stdin) != NULL);
+    int sscanf_ret = sscanf(input_buffer, "%s", excess_buffer);
+    switch (sscanf_ret)
+    {
+      case -1: // No input
+        noNames = true;
+        validInput = true;
+        break;
+      case 0: // Not a number
+        printf("You have not typed a string.\n");
+        break;
+      case 1: // Ret value has been assigned - bounds check
+        if (strlen(excess_buffer) > max_size)
+        {
+          printf("Your input is too long. It can be no bigger than %d characters.\n", max_size);
+        }
+        else
+        {
+          memcpy(string_ptr, excess_buffer, NODE_NAME_MAX_LENGTH);
+          for (int i = 0; i < strlen(string_ptr); i++)
+          {
+            string_ptr[i] = tolower(string_ptr[i]);
+          }
+          validInput = true;
+        }
+        break;
+    }
+	} while (!validInput);
+
+  free(input_buffer);
+  free(excess_buffer);
+  return noNames;
 }
