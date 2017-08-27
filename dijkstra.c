@@ -5,56 +5,33 @@
 
 #include <stdio.h>
 #include <strings.h>
+#include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <math.h>
 
-#define EXCESS_BUFFER_SIZE 0xFFF
+#define BUFFER_SIZE 0xFFF
+#define MAX_NUMBER_NODES 0xFF
+#define NODE_NAME_MAX_LENGTH 32
 
 int N, M;
 int * edge_matrix;
 char ** node_list;
 
-int directed, weighted, scanf_ret;
-char excess_buffer [EXCESS_BUFFER_SIZE];
+int directed, weighted, scanf_ret, excessscanf_ret;
 
 void getParameters(void);
+int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype);
+void getInputString(char * message, unsigned int max_size, char * string_ptr);
 
 int main(void)
 {
+  char excess_buffer [BUFFER_SIZE];
   printf("Welcome to dijkstra.c!\n");
 
-  do
-	{
-    printf("For an undirected graph, type 0. For a directed graph, type 1. ");
-		scanf_ret = scanf("%d", &directed);
-		if (!scanf_ret)
-		{
-			printf("This is a string! Try again.\n");
-      scanf("%s", excess_buffer);
-		}
-    else if (!(directed == 1 || directed == 0))
-    {
-      printf("Please type in either 0 or 1!\n");
-      scanf_ret = 0;
-    }
-	} while (!scanf_ret);
-
-  do
-	{
-    printf("For an unweighted graph, type 0. For a weighted graph, type 1. ");
-		scanf_ret = scanf("%d", &weighted);
-		if (!scanf_ret)
-		{
-			printf("This is a string! Try again.\n");
-      scanf("%s", excess_buffer);
-		}
-    else if (!(weighted == 1 || weighted == 0))
-    {
-      printf("Please type in either 0 or 1!\n");
-      scanf_ret = 0;
-    }
-	} while (!scanf_ret);
+  directed = getInputInt("For an undirected graph, type 0. For a directed graph, type 1.", 0, 1, "options");
+  weighted = getInputInt("For an unweighted graph, type 0. For a weighted graph, type 1.", 0, 1, "options");
 
   getParameters();
 
@@ -93,35 +70,13 @@ void getParameters()
   * Shortcut for fully connected unweighted graph?
   * How to specify edges? Program prompt or user input?
   */
+  char excess_buffer [BUFFER_SIZE];
 
-  do
-  {
-    printf("Type in the number of nodes in the graph. ");
-    scanf_ret = scanf("%d", &N);
-    if (!scanf_ret)
-    {
-      printf("This is a string! Try again.\n");
-      scanf("%s", excess_buffer);
-    }
-  } while (!scanf_ret);
+  N = getInputInt("Type in the number of nodes in the graph.", 1, MAX_NUMBER_NODES, "range");
 
-  int max_edges = (N * (N-1)) / 2; // CHANGE THIS: depends on directedness (*2 for directed)
+  int max_edges = (directed) ? (N * (N-1)) : ((N * (N-1))/2) ;
 
-  do
-  {
-    printf("Type in the number of edges in the graph. ");
-    scanf_ret = scanf("%d", &M);
-    if (!scanf_ret)
-    {
-      printf("This is a string! Try again.\n");
-      scanf("%s", excess_buffer);
-    }
-    else if (M > max_edges)
-    {
-      printf("This is too many edges. Try again.\n");
-      scanf_ret = 0;
-    }
-  } while (!scanf_ret);
+  M = getInputInt("Type in the number of nodes in the graph.", 0, max_edges, "range");
 
   // Allocating edges and nodes dynamically
   int edge_matrix_size = N*N;
@@ -138,9 +93,8 @@ void getParameters()
   printf("Type in names for your %d nodes (maximum 31 characters, no spaces).\n", N);
 
   /*
-  GARBAGE CODE:
+  GARBAGE CODE (to be fixed):
   */
-  getchar(); // Probably a code smell? Flushing out the last \n before using fgets
   for (int i = 0; i < N; i++)
   {
     printf("Node %d: ", i+1);
@@ -157,4 +111,59 @@ void getParameters()
       edge_matrix[i*N +j] = (M == max_edges) ? 1 : -1;
     }
   }
+}
+
+int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype)
+{
+  char input_buffer [BUFFER_SIZE];
+  char excess_buffer [BUFFER_SIZE];
+  bool validInput = false;
+
+  // - ignore all whitespace
+  // - raise error for strings
+  // - error for too many characters (of any kind)
+  // - error for no input
+  // - within bounds
+
+  int ret;
+
+  do
+	{
+    printf("%s ", message);
+    assert(fgets(input_buffer, 32, stdin) != NULL); // input to buffer
+    int sscanf_ret = sscanf(input_buffer, "%u%s", &ret, excess_buffer);
+    switch (sscanf_ret)
+    {
+      case -1: // No input
+        printf("You have not typed a value.\n");
+        break;
+      case 0: // Not a number
+        printf("You have not typed a number.\n");
+        break;
+      case 1: // Ret value has been assigned - bounds check
+        if (strcmp(inputtype, "options") == 0 && ret != lowerbound && ret != upperbound)
+        {
+          printf("The value '%d' is not %d or %d\n", ret, lowerbound, upperbound);
+        }
+        else if (strcmp(inputtype, "range") == 0 && (ret < lowerbound || ret > upperbound))
+        {
+          printf("The value '%d' is not between %d and %d\n", ret, lowerbound, upperbound);
+        }
+        else
+        {
+          validInput = true;
+        }
+        break;
+      case 2: // There is an int followed by other characters
+        printf("You have typed other characters after\n");
+        break;
+    }
+	} while (!validInput);
+
+  return ret;
+}
+
+void getInputString(char * message, unsigned int max_size, char * string_ptr)
+{
+  // input_buffer[strcspn(input_buffer, "\n")] = 0; // replacing /n from fgets with /0
 }
