@@ -10,17 +10,46 @@
 #include "dijkstra.h"
 #include "priority_queue.h"
 
-void Dijkstra(int N, int * edge_matrix, int sourcenode)
+int * Dijkstra(int N, int * edge_matrix, int sourcenode)
 {
-  int * distances = newPriorityQueueFromEdgeMatrix(N, sourcenode);
+  int * distances = newPriorityQueueFromEdgeMatrix(N, sourcenode); // Sets source distance to 0 and rest to infinity
   int * previous = malloc(N * sizeof(int));
+  for (int i = 0; i < N; i++)
+  {
+    previous[i] = (i == sourcenode) ? sourcenode : -1; // Previous node in optimal path undefined
+  }
 
+  while(!isEmpty(N, distances))
+  {
+    int nextNode = extractMin(N, distances);
+    for (int j = 0; j < N; j++)
+    {
+      if (validNeighbour(N, edge_matrix, distances, nextNode, j))
+      {
+        int newPathLength = distances[nextNode] + edge_matrix[nextNode*N + j];
+        if (newPathLength < distances[j])
+        {
+          changePriority(N, distances, j, newPathLength);
+          previous[j] = nextNode;
+        }
+      }
+    }
+  }
 
-  // keep array previous[N]
-  // need edge matrix and distance priority queue to run algorithm
-  // define isNeighbour function
-  // remember to ignore all entries of -1 in the edge matrix because that
-  // is an absent edge and Dijkstra fails with negative edge weights
   free(distances);
-  free(previous);
+  return previous;
+}
+
+bool validNeighbour(int N, int * edge_matrix, int * distances, int i, int j)
+{
+  bool valid = true;
+  if (edge_matrix[i*N + j] == -1) // no edge between i and j
+  {
+    valid = false;
+  }
+  if (distances[j] == -1) // already visited node
+  {
+    valid = false;
+  }
+  return valid;
 }

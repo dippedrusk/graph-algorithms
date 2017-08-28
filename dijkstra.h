@@ -6,6 +6,7 @@
 #ifndef _DIJKSTRA_H
 #define _DIJKSTRA_H
 
-void Dijkstra(int N, int * edge_matrix, int sourcenode);
+int * Dijkstra(int N, int * edge_matrix, int sourcenode);
+bool validNeighbour(int N, int * edge_matrix, int * distances, int i, int j);
 
 #endif
