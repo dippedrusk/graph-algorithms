@@ -20,12 +20,14 @@
 int N, M;
 int * edge_matrix;
 char ** node_list;
+int declaredEdges;
 
 int directed, weighted, scanf_ret, excessscanf_ret;
 
 void getParameters(void);
 int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype);
 bool getInputString(char * message, unsigned int max_size, char * string_ptr);
+void getNextEdge(int i, int j);
 
 int main(void)
 {
@@ -36,21 +38,23 @@ int main(void)
 
   getParameters();
 
-  printf("Printing nodes:\n");
+  printf("\nEdge matrix for your graph:\n");
+  printf("\n\t");
   for (int i = 0; i < N; i++)
   {
-    printf("%s\n", node_list[i]);
+    printf("%s\t", node_list[i]);
   }
-
-  printf("Printing edges:\n");
+  printf("\n");
   for (int i = 0; i < N; i++)
   {
+    printf("%s\t", node_list[i]);
     for (int j = 0; j < N; j++)
     {
-      printf("%d ", edge_matrix[i*N + j]);
+      printf("%d\t", edge_matrix[i*N + j]);
     }
     printf("\n");
   }
+  printf("\n");
 
   // Didn't forget to free shit this time!
   for (int i = 0; i < N; i++)
@@ -66,11 +70,6 @@ int main(void)
 
 void getParameters()
 {
-
-  /* Things to implement:
-  * Shortcut for fully connected unweighted graph?
-  * How to specify edges? Program prompt or user input?
-  */
   char excess_buffer [BUFFER_SIZE];
 
   N = getInputInt("Type in the number of nodes in the graph.", 1, MAX_NUMBER_NODES, "range");
@@ -123,6 +122,59 @@ void getParameters()
       edge_matrix[i*N +j] = (M == max_edges) ? 1 : -1;
     }
   }
+
+  declaredEdges = (M == max_edges) ? M : 0;
+  int i, j;
+  while (declaredEdges != M)
+  {
+    for (i = 0; i < N; i++)
+    {
+      for (j = 0; j < N; j++)
+      {
+        if (declaredEdges >= M)
+        {
+          break;
+        }
+        if (i < j || i > j)
+        {
+          getNextEdge(i, j);
+        }
+      }
+    }
+    if (declaredEdges < M)
+    {
+      printf("You have declared %d of %d edges. Try again!\n", declaredEdges, M);
+    }
+  }
+
+}
+
+void getNextEdge(int i, int j)
+{
+  if ((edge_matrix[i*N + j]) == -1) // i.e., not yet changed
+  {
+    char message_buffer [BUFFER_SIZE];
+    sprintf(message_buffer, "Type 1 if there is an edge between node %d [%s] and %d [%s], otherwise type 0:", i+1, node_list[i], j+1, node_list[j]);
+    int result = getInputInt(message_buffer, 0, 1, "options");
+    if (result)
+    {
+      int weight;
+      if (weighted)
+      {
+        sprintf(message_buffer, "Type the weight of the edge between node %d [%s] and %d [%s]:", i+1, node_list[i], j+1, node_list[j]);
+        weight = getInputInt(message_buffer, 0, MAX_EDGE_WEIGHT, "range");
+      }
+      edge_matrix[i*N + j] = (weighted) ? weight : result;
+      declaredEdges++;
+      printf("[Edge %d of %d]: %s -> %s\n", declaredEdges, M, node_list[i], node_list[j]);
+      if (!directed)
+      {
+        edge_matrix[j*N + i] = (weighted) ? weight : result;
+        declaredEdges++;
+        printf("[Edge %d of %d]: %s -> %s\n", declaredEdges, M, node_list[j], node_list[i]);
+      }
+    }
+  }
 }
 
 int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype)
@@ -142,7 +194,7 @@ int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype
   int ret;
 
   do
-	{
+  {
     printf("%s ", message);
     assert(fgets(input_buffer, BUFFER_SIZE, stdin) != NULL); // input to buffer
     int sscanf_ret = sscanf(input_buffer, "%u%s", &ret, excess_buffer);
@@ -172,7 +224,7 @@ int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype
         printf("You have typed other characters after\n");
         break;
     }
-	} while (!validInput);
+  } while (!validInput);
 
   free(input_buffer);
   free(excess_buffer);
@@ -194,7 +246,7 @@ bool getInputString(char * message, unsigned int max_size, char * string_ptr)
   // - within bounds
 
   do
-	{
+  {
     printf("%s ", message);
     assert(fgets(input_buffer, BUFFER_SIZE, stdin) != NULL);
     int sscanf_ret = sscanf(input_buffer, "%s", excess_buffer);
@@ -223,7 +275,7 @@ bool getInputString(char * message, unsigned int max_size, char * string_ptr)
         }
         break;
     }
-	} while (!validInput);
+  } while (!validInput);
 
   free(input_buffer);
   free(excess_buffer);

@@ -1,7 +1,13 @@
 1
 0
 3
-6
-Chennai
-Singapore
-Vancouver
+3
+Chen
+Sing
+Vanc
+1
+1
+1
+0
+1
+0
