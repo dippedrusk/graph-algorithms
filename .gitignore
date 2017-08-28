@@ -1,4 +1,8 @@
-# All executables
-test
-*.out
 
+# Test files
+test.c
+test
+
+# All executables
+*.out
+dijkstra
