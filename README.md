@@ -5,6 +5,7 @@ Run `make` to compile. This will produce the following executables:
 * more to come...
 
 # Contents
-* driver.c
-* dijkstra.c
-* breadthfirst.c
+* graphs (compile with `make graphs`)
+  * driver.c - Graph input and driver program
+  * dijkstra.c - Contains implementation of Dijkstra's algorithm
+  * priority_queue.c - Contains a priority queue implementation for dijkstra.c
