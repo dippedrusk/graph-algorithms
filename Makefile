@@ -3,8 +3,8 @@ SHELL = /bin/sh
 CC = gcc
 CFLAGS = -Wall
 
-graphs_headers = dijkstra.h graphs.h breadthfirst.h
-graphs_src = driver.c dijkstra.c breadthfirst.c
+graphs_headers = dijkstra.h graphs.h
+graphs_src = driver.c dijkstra.c
 
 test_src = test.c
 

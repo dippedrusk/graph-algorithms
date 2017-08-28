@@ -58,19 +58,8 @@ int main(void)
   }
   printf("\n");
 
-  // Shortest paths
-  // - BFS for unweighted
-  // - Dijkstra's for weighted
-
   int sourcenode = getSourceNode();
-  if (weighted)
-  {
-    Dijkstra(N, edge_matrix, sourcenode);
-  }
-  else
-  {
-    BFS(N, edge_matrix, sourcenode);
-  }
+  Dijkstra(N, edge_matrix, sourcenode);
 
   // Didn't forget to free shit this time!
   for (int i = 0; i < N; i++)

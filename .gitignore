@@ -1,8 +1,5 @@
 
-# Test files
-test.c
-test
-
 # All executables
 *.out
 dijkstra
+test
