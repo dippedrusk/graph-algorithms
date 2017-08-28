@@ -3,9 +3,9 @@
  * that will work on graphs that are inputted at runtime
  */
 
-#include "dijkstra.h"
+#ifndef _DIJKSTRA_H
+#define _DIJKSTRA_H
 
-void Dijkstra(int N, int * edge_matrix, int sourcenode)
-{
+void Dijkstra(int N, int * edge_matrix, int sourcenode);
 
-}
+#endif

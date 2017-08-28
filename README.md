@@ -1,8 +1,10 @@
 # 307
 Implementations of various important algorithms I learned about in CMPT 307.
-Run `make` to compile.
+Run `make` to compile. This will produce the following executables:
+* graphs
+* more to come...
 
 # Contents
+* driver.c
 * dijkstra.c
-  * WILL CONTAIN an implementation of Dijkstra's algorithm
-  * Test with `dijkstra < samplegraph.txt`
+* breadthfirst.c
