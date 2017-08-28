@@ -1,6 +1,7 @@
 
-/* Will eventually contain an implementation of Dijkstra's algorithm
- * that will work on graphs that are inputted at runtime
+/* Graphs driver program
+ * Takes and validates an input graph and calls Dijkstra's algorithm on it
+ * August 27th, 2017
  */
 
 #include <stdio.h>
@@ -22,15 +23,13 @@ int N, M;
 int * edge_matrix;
 char ** node_list;
 int declaredEdges;
-
-int directed, weighted, scanf_ret, excessscanf_ret;
+int directed, weighted;
 
 void getParameters(void);
 int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype);
 bool getInputString(char * message, unsigned int max_size, char * string_ptr);
 void getNextEdge(int i, int j);
 int getSourceNode(void);
-void printOptimalPaths(int * previous, int sourcenode);
 
 int main(void)
 {
@@ -60,23 +59,14 @@ int main(void)
   printf("\n");
 
   int sourcenode = getSourceNode();
-  int * previous = Dijkstra(N, edge_matrix, sourcenode);
+  Dijkstra(sourcenode);
 
-  printf("Printing optimal paths:\n");
-  for(int i = 0; i < N; i++)
-  {
-    printOptimalPaths(previous, i);
-    printf("\n");
-  }
-
-  // Didn't forget to free shit this time!
   for (int i = 0; i < N; i++)
   {
     free(node_list[i]);
   }
   free(edge_matrix);
   free(node_list);
-  free(previous);
 
   printf("\nSuccess!\n\n");
   return 0;
@@ -321,14 +311,4 @@ int getSourceNode(void)
     }
   } while(!valid);
   return 0; // defaults to first node if no source specified
-}
-
-void printOptimalPaths(int * previous, int curr_node)
-{
-  printf("%s", node_list[curr_node]);
-  if (previous[curr_node] != curr_node)
-  {
-    printf(" <= ");
-    printOptimalPaths(previous, previous[curr_node]);
-  }
 }
