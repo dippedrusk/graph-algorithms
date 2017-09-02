@@ -14,5 +14,5 @@ Run `make` or `make all` to compile. This will produce the following executables
   * prim.c - Implementation of Prim's algorithm to find Minimal Spanning Trees
   * graph_input.c - Graph input program
 * Kruskal's algorithm (compile with `make kruskal`)
-  * kruskal.c - Implementation of Kruskal's algorithm to find Minimal Spanning Trees with the Union-Find data structures
+  * kruskal.c - Implementation of Kruskal's algorithm to find Minimal Spanning Trees with the Union-Find data structure
   * graph_input.c - Graph input program
