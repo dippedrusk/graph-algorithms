@@ -24,7 +24,6 @@ void changeDistance(int key, int newDistance);
 int extractNodeOfMinDistanceToMST(void);
 bool allNodesVisited(void);
 void printOptimalPaths(int curr_node);
-bool visited(int j);
 bool validNeighbour(int i, int j);
 
 int main (void)
@@ -53,6 +52,7 @@ int main (void)
 void Prim(int sourcenode)
 {
   distances = newPriorityQueueFromEdgeMatrix(sourcenode); // Sets source distance to 0 and rest to infinity
+  assert(distances);
   previous = malloc(N * sizeof(int));
   for (int i = 0; i < N; i++)
   {
@@ -99,15 +99,6 @@ bool validNeighbour(int i, int j)
     valid = false;
   }
   return valid;
-}
-
-bool visited(int j)
-{
-  if (distances[j] == -1) // already visited node
-  {
-    return true;
-  }
-  return false;
 }
 
 int * newPriorityQueueFromEdgeMatrix(int sourcenode)
@@ -163,7 +154,7 @@ void printOptimalPaths(int curr_node)
   printf("%s", node_list[curr_node]);
   if (previous[curr_node] != curr_node)
   {
-    printf(" <= ");
+    printf(" -- ");
     printOptimalPaths(previous[curr_node]);
   }
 }
