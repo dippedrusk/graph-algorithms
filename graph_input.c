@@ -1,6 +1,7 @@
 
-/* Graphs driver program
- * Takes and validates an input graph and calls Dijkstra's algorithm on it
+/* Graph input program
+ * Takes and validates an input graph and returns to any driver program that
+ * calls it
  * August 27th, 2017
  */
 
@@ -12,79 +13,42 @@
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
-#include "graphs.h"
 
 #define BUFFER_SIZE 0xFFF
 #define MAX_NUMBER_NODES 0xFF
 #define MAX_EDGE_WEIGHT 0xFF
 #define NODE_NAME_MAX_LENGTH 32
 
-int N, M;
-int * edge_matrix;
-char ** node_list;
 int declaredEdges;
-int directed, weighted;
 
-void getParameters(void);
+void getParameters(int * N_ptr, int * M_ptr, int * directed_ptr, int * weighted_ptr);
+char ** getNodeList(int M);
+int * getGraph(int N, int M, int directed, int weighted, char ** node_list);
 int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype);
 bool getInputString(char * message, unsigned int max_size, char * string_ptr);
-void getNextEdge(int i, int j);
-int getSourceNode(void);
+int getSourceNode(int N, char ** node_list);
+void deleteGraph(int N, int * edge_matrix, char ** node_list);
 
-int main(void)
+void getParameters(int * N_ptr, int * M_ptr, int * directed_ptr, int * weighted_ptr)
 {
-  printf("\nWelcome to dijkstra.c!\n");
+  int directed = getInputInt("\nFor an undirected graph, type 0. For a directed graph, type 1.", 0, 1, "options");
+  int weighted = getInputInt("\nFor an unweighted graph, type 0. For a weighted graph, type 1.", 0, 1, "options");
 
-  directed = getInputInt("\nFor an undirected graph, type 0. For a directed graph, type 1.", 0, 1, "options");
-  weighted = getInputInt("\nFor an unweighted graph, type 0. For a weighted graph, type 1.", 0, 1, "options");
-
-  getParameters();
-
-  printf("\nEdge matrix for your graph:\n");
-  printf("\n\t");
-  for (int i = 0; i < N; i++)
-  {
-    printf("%s\t", node_list[i]);
-  }
-  printf("\n");
-  for (int i = 0; i < N; i++)
-  {
-    printf("%s\t", node_list[i]);
-    for (int j = 0; j < N; j++)
-    {
-      printf("%d\t", edge_matrix[i*N + j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
-
-  int sourcenode = getSourceNode();
-  Dijkstra(sourcenode);
-
-  for (int i = 0; i < N; i++)
-  {
-    free(node_list[i]);
-  }
-  free(edge_matrix);
-  free(node_list);
-
-  printf("\nSuccess!\n\n");
-  return 0;
-}
-
-void getParameters()
-{
-  N = getInputInt("\nType in the number of nodes in the graph.", 1, MAX_NUMBER_NODES, "range");
+  int N = getInputInt("\nType in the number of nodes in the graph.", 1, MAX_NUMBER_NODES, "range");
 
   int max_edges = (directed) ? (N * (N-1)) : ((N * (N-1))/2) ;
 
-  M = getInputInt("\nType in the number of edges in the graph.", 0, max_edges, "range");
+  int M = getInputInt("\nType in the number of edges in the graph.", 0, max_edges, "range");
 
-  // Allocating edges and nodes dynamically
-  int edge_matrix_size = N*N;
-  edge_matrix = (int *) malloc(edge_matrix_size * sizeof(int));
-  assert(edge_matrix);
-  node_list = (char **) malloc(N * sizeof(char*));
+  *directed_ptr = directed;
+  *weighted_ptr = weighted;
+  *N_ptr = N;
+  *M_ptr = M;
+}
+
+char ** getNodeList(int N)
+{
+  char ** node_list = (char **) malloc(N * sizeof(char*));
   assert(node_list);
   for (int i = 0; i < N; i++)
   {
@@ -117,66 +81,82 @@ void getParameters()
     } while(!unique);
   }
 
+  return node_list;
+}
+
+int * getGraph(int N, int M, int directed, int weighted, char ** node_list)
+{
+  int edge_matrix_size = N * N;
+  int * edge_matrix = (int *) malloc(edge_matrix_size * sizeof(int));
+  assert(edge_matrix);
+
   for (int i = 0; i < N; i++)
   {
     for (int j = 0; j < N; j++)
     {
-      edge_matrix[i*N +j] = (M == max_edges) ? 1 : -1;
+      edge_matrix[i*N +j] = -1;
     }
   }
 
-  declaredEdges = (M == max_edges) ? M : 0;
+  declaredEdges = 0;
   int i, j;
-  while (declaredEdges != M)
+  for (i = 0; i < N; i++)
   {
-    for (i = 0; i < N; i++)
+    for (j = 0; j < N; j++)
     {
-      for (j = 0; j < N; j++)
+      if (declaredEdges >= M)
       {
-        if (declaredEdges >= M)
-        {
-          break;
-        }
-        if (i < j || i > j)
-        {
-          getNextEdge(i, j);
-        }
+        break;
       }
-    }
-    if (declaredEdges < M)
-    {
-      printf("You have declared %d of %d edges. Try again!\n\n", declaredEdges, M);
-    }
-  }
-
-}
-
-void getNextEdge(int i, int j)
-{
-  if ((edge_matrix[i*N + j]) == -1) // i.e., not yet changed
-  {
-    char message_buffer [BUFFER_SIZE];
-    sprintf(message_buffer, "Type 1 if there is an edge between node %d [%s] and %d [%s], otherwise type 0:", i+1, node_list[i], j+1, node_list[j]);
-    int result = getInputInt(message_buffer, 0, 1, "options");
-    if (result)
-    {
-      int weight;
-      if (weighted)
+      if ((i != j) && (edge_matrix[i*N + j] == -1)) // i.e., not yet changed
       {
-        sprintf(message_buffer, "Type the weight of the edge between node %d [%s] and %d [%s]:", i+1, node_list[i], j+1, node_list[j]);
-        weight = getInputInt(message_buffer, 0, MAX_EDGE_WEIGHT, "range");
-      }
-      edge_matrix[i*N + j] = (weighted) ? weight : result;
-      declaredEdges++;
-      printf("[Edge %d of %d]: %s -> %s\n\n", declaredEdges, M, node_list[i], node_list[j]);
-      if (!directed)
-      {
-        edge_matrix[j*N + i] = (weighted) ? weight : result;
-        declaredEdges++;
-        printf("[Edge %d of %d]: %s -> %s\n\n", declaredEdges, M, node_list[j], node_list[i]);
+        char message_buffer [BUFFER_SIZE];
+        sprintf(message_buffer, "Type 1 if there is an edge between node %d [%s] and %d [%s], otherwise type 0:", i+1, node_list[i], j+1, node_list[j]);
+        int weight = getInputInt(message_buffer, 0, 1, "options");
+        if (weight)
+        {
+          if (weighted)
+          {
+            sprintf(message_buffer, "Type the weight of the edge between node %d [%s] and %d [%s]:", i+1, node_list[i], j+1, node_list[j]);
+            weight = getInputInt(message_buffer, 0, MAX_EDGE_WEIGHT, "range");
+          }
+          edge_matrix[i*N + j] = weight;
+          printf("[Edge %d of %d]: %s -> %s\n\n", ++declaredEdges, M, node_list[i], node_list[j]);
+          if (!directed)
+          {
+            edge_matrix[j*N + i] = weight;
+            printf("[Edge %d of %d]: %s -> %s\n\n", ++declaredEdges, M, node_list[j], node_list[i]);
+          }
+        }
       }
     }
   }
+  if (declaredEdges < M)
+  {
+    printf("You have declared %d of %d edges. Try again!\n\n", declaredEdges, M);
+    free(edge_matrix);
+    edge_matrix = getGraph(N, M, directed, weighted, node_list);
+  }
+
+  printf("\nEdge matrix for your graph:\n");
+  printf("\n\t");
+  for (int i = 0; i < N; i++)
+  {
+    printf("%s\t", node_list[i]);
+  }
+  printf("\n");
+  for (int i = 0; i < N; i++)
+  {
+    printf("%s\t", node_list[i]);
+    for (int j = 0; j < N; j++)
+    {
+      printf("%d\t", edge_matrix[i*N + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  return edge_matrix;
 }
 
 int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype)
@@ -284,7 +264,7 @@ bool getInputString(char * message, unsigned int max_size, char * string_ptr)
   return noNames;
 }
 
-int getSourceNode(void)
+int getSourceNode(int N, char ** node_list)
 {
   bool valid = false;
   char sourcenode[NODE_NAME_MAX_LENGTH];
@@ -311,4 +291,14 @@ int getSourceNode(void)
     }
   } while(!valid);
   return 0; // defaults to first node if no source specified
+}
+
+void deleteGraph(int N, int * edge_matrix, char ** node_list)
+{
+  for (int i = 0; i < N; i++)
+  {
+    free(node_list[i]);
+  }
+  free(edge_matrix);
+  free(node_list);
 }

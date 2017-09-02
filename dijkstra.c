@@ -8,15 +8,41 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "dijkstra.h"
+#include "graph_input.h"
 
 #define INFINITY 0xFFFF
 
-extern int N, M;
-extern int * edge_matrix;
-extern char ** node_list;
+int N, M, directed, weighted;
+int * edge_matrix;
+char ** node_list;
 int * previous;
 int * distances;
+
+void Dijkstra(int sourcenode);
+bool validNeighbour(int i, int j);
+int * newPriorityQueueFromEdgeMatrix(int sourcenode);
+void changeDistance(int key, int newDistance);
+int extractMinDistance(void);
+bool allNodesVisited(void);
+void printOptimalPaths(int curr_node);
+
+int main (void)
+{
+  printf("\nWelcome to dijkstra.c!\n");
+
+  getParameters(&N, &M, &directed, &weighted);
+  node_list = getNodeList(N);
+  assert(node_list);
+  edge_matrix = getGraph(N, M, directed, weighted, node_list);
+  assert(edge_matrix);
+  int sourcenode = getSourceNode(N, node_list);
+
+  Dijkstra(sourcenode);
+
+  deleteGraph(N, edge_matrix, node_list);
+
+  return 0;
+}
 
 void Dijkstra(int sourcenode)
 {
