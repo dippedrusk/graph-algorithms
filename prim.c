@@ -1,7 +1,7 @@
 
 /* Source
- * Implementation of Dijkstra's algorithm
- * August 28th, 2017
+ * Implementation of Prim's algorithm
+ * September 2nd, 2017
  */
 
 #include <stdio.h>
@@ -18,33 +18,39 @@ char ** node_list;
 int * previous;
 int * distances;
 
-void Dijkstra(int sourcenode);
-bool validNeighbour(int i, int j);
+void Prim(int sourcenode);
 int * newPriorityQueueFromEdgeMatrix(int sourcenode);
 void changeDistance(int key, int newDistance);
-int extractMinDistance(void);
+int extractNodeOfMinDistanceToMST(void);
 bool allNodesVisited(void);
 void printOptimalPaths(int curr_node);
+bool visited(int j);
+bool validNeighbour(int i, int j);
 
 int main (void)
 {
-  printf("\nWelcome to dijkstra.c!\n");
+  printf("\nWelcome to prim.c!\n");
 
   getParameters(&N, &M, &directed, &weighted);
+  if (directed)
+  {
+    printf("Prim's algorithm cannot be run on a directed graph.\n");
+    return 1;
+  }
   node_list = getNodeList(N);
   assert(node_list);
   edge_matrix = getGraph(N, M, directed, weighted, node_list);
   assert(edge_matrix);
   int sourcenode = getSourceNode(N, node_list);
 
-  Dijkstra(sourcenode);
+  Prim(sourcenode);
 
   deleteGraph(N, edge_matrix, node_list);
 
   return 0;
 }
 
-void Dijkstra(int sourcenode)
+void Prim(int sourcenode)
 {
   distances = newPriorityQueueFromEdgeMatrix(sourcenode); // Sets source distance to 0 and rest to infinity
   previous = malloc(N * sizeof(int));
@@ -55,12 +61,12 @@ void Dijkstra(int sourcenode)
 
   while(!allNodesVisited())
   {
-    int nextNode = extractMinDistance();
+    int nextNode = extractNodeOfMinDistanceToMST();
     for (int j = 0; j < N; j++)
     {
       if (validNeighbour(nextNode, j))
       {
-        int newPathLength = distances[nextNode] + edge_matrix[nextNode*N + j];
+        int newPathLength = edge_matrix[nextNode*N + j];
         if (newPathLength < distances[j])
         {
           changeDistance(j, newPathLength);
@@ -68,7 +74,6 @@ void Dijkstra(int sourcenode)
         }
       }
     }
-    changeDistance(nextNode, -1); // Mark node as reached
   }
 
   printf("Printing optimal paths:\n");
@@ -96,6 +101,15 @@ bool validNeighbour(int i, int j)
   return valid;
 }
 
+bool visited(int j)
+{
+  if (distances[j] == -1) // already visited node
+  {
+    return true;
+  }
+  return false;
+}
+
 int * newPriorityQueueFromEdgeMatrix(int sourcenode)
 {
   int * p_queue = malloc(N * sizeof(int));
@@ -114,7 +128,7 @@ void changeDistance(int key, int newDistance)
   distances[key] = newDistance;
 }
 
-int extractMinDistance(void)
+int extractNodeOfMinDistanceToMST(void)
 {
   int i;
   int min = INFINITY;
@@ -127,7 +141,7 @@ int extractMinDistance(void)
       min_index = i;
     }
   }
-  //distances[min_index] = -1;
+  distances[min_index] = -1;
   return min_index;
 }
 

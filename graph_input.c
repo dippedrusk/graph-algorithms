@@ -125,7 +125,6 @@ int * getGraph(int N, int M, int directed, int weighted, char ** node_list)
           if (!directed)
           {
             edge_matrix[j*N + i] = weight;
-            printf("[Edge %d of %d]: %s -> %s\n\n", ++declaredEdges, M, node_list[j], node_list[i]);
           }
         }
       }
@@ -270,7 +269,7 @@ int getSourceNode(int N, char ** node_list)
   char sourcenode[NODE_NAME_MAX_LENGTH];
   do
   {
-    bool noNames = getInputString("From which node would you like to know the shortest paths?", NODE_NAME_MAX_LENGTH, sourcenode);
+    bool noNames = getInputString("From which node would you like to begin running the algorithm?", NODE_NAME_MAX_LENGTH, sourcenode);
     if (noNames)
     {
       break;
