@@ -2,7 +2,7 @@
 # All executables
 *.out
 .DS_Store
-graphs
 dijkstra
 prim
-test
+kruskal
+bellmanford

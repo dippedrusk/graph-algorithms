@@ -25,7 +25,6 @@ void changeDistance(int key, int newDistance);
 int extractMinDistance(void);
 bool allNodesVisited(void);
 void printOptimalPaths(int curr_node);
-bool hasNegativeWeights(void);
 
 int main (void)
 {
@@ -89,7 +88,7 @@ void Dijkstra(int sourcenode)
 bool validNeighbour(int i, int j)
 {
   bool valid = true;
-  if (edge_matrix[i*N + j] == -1) // no edge between i and j
+  if (!edgeExists(i, j, N, edge_matrix)) // no edge between i and j
   {
     valid = false;
   }
@@ -131,7 +130,6 @@ int extractMinDistance(void)
       min_index = i;
     }
   }
-  //distances[min_index] = -1;
   return min_index;
 }
 
@@ -156,16 +154,4 @@ void printOptimalPaths(int curr_node)
     printf(" <= ");
     printOptimalPaths(previous[curr_node]);
   }
-}
-
-bool hasNegativeWeights(void)
-{
-  for (int i = 0; i < N*N; i++)
-  {
-    if (edge_matrix[i] < 0)
-    {
-      return false;
-    }
-  }
-  return true;
 }

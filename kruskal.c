@@ -62,13 +62,13 @@ void Kruskal(void)
   while(!allNodesVisited())
   {
     int min_edge_weight = INFINITY;
-    int min_i, min_j;
-    for (int i = 0; i < N; i++)
+    int min_i, min_j, i, j;
+    for (i = 0; i < N; i++)
     {
-      for (int j = 0; j < N; j++)
+      for (j = 0; j < N; j++)
       {
         int edgeweight = edge_matrix[i*N + j];
-        if ((edgeweight < min_edge_weight) && (edgeweight != -1))
+        if ((edgeweight < min_edge_weight) && edgeExists(i, j, N, edge_matrix))
         {
           min_edge_weight = edge_matrix[i*N + j];
           min_i = i;
@@ -76,20 +76,13 @@ void Kruskal(void)
         }
       }
     }
-    printf("%d %d\n", min_i, min_j);
     if (Find(min_i) != Find(min_j))
     {
       previous[min_i] = min_j;
       Union(min_i, min_j);
     }
-    edge_matrix[min_i*N + min_j] = -1;
+    deleteEdge(min_i, min_j, N, edge_matrix);
   }
-
-  for (int i = 0; i < N; i++)
-  {
-    printf("%d ", previous[i]);
-  }
-  printf("\n\n");
 
   printf("Printing optimal paths:\n");
   for(int i = 0; i < N; i++)
@@ -135,15 +128,17 @@ void Union(int u, int v)
 
 bool allNodesVisited(void)
 {
-  bool empty = true;
-  for (int i = 0; i < N*N; i++)
+  for (int i = 0; i < N; i++)
   {
-    if (edge_matrix[i] != -1)
+    for (int j = 0; j < N; j++)
     {
-      empty = false;
+      if (edgeExists(i, j, N, edge_matrix))
+      {
+        return false;
+      }
     }
   }
-  return empty;
+  return true;
 }
 
 void printOptimalPaths(int curr_node)

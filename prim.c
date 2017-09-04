@@ -92,7 +92,7 @@ void Prim(int sourcenode)
 bool validNeighbour(int i, int j)
 {
   bool valid = true;
-  if (edge_matrix[i*N + j] == -1) // no edge between i and j
+  if (!edgeExists(i, j, N, edge_matrix))
   {
     valid = false;
   }
@@ -140,15 +140,14 @@ int extractNodeOfMinDistanceToMST(void)
 
 bool allNodesVisited(void)
 {
-  bool empty = true;
   for (int i = 0; i < N; i++)
   {
     if (distances[i] != -1)
     {
-      empty = false;
+      return false;
     }
   }
-  return empty;
+  return true;
 }
 
 void printOptimalPaths(int curr_node)

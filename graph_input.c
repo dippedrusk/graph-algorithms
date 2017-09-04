@@ -13,23 +13,19 @@
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
+#include "graph_input.h"
 
 #define BUFFER_SIZE 0xFFF
 #define MAX_NUMBER_NODES 0xFF
+
 #define MIN_NEG_EDGE_WEIGHT -255
 #define MIN_NONNEG_EDGE_WEIGHT 0
 #define MAX_EDGE_WEIGHT 255
 #define NODE_NAME_MAX_LENGTH 32
 
-int declaredEdges;
+#define EDGE_DOES_NOT_EXIST -500
 
-void getParameters(int * N_ptr, int * M_ptr, int * directed_ptr, int * weighted_ptr);
-char ** getNodeList(int M);
-int * getGraph(int N, int M, int directed, int weighted, char ** node_list, bool negativeEdgesOkay);
-int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype);
-bool getInputString(char * message, unsigned int max_size, char * string_ptr);
-int getSourceNode(int N, char ** node_list);
-void deleteGraph(int N, int * edge_matrix, char ** node_list);
+int declaredEdges;
 
 void getParameters(int * N_ptr, int * M_ptr, int * directed_ptr, int * weighted_ptr)
 {
@@ -96,7 +92,7 @@ int * getGraph(int N, int M, int directed, int weighted, char ** node_list, bool
   {
     for (int j = 0; j < N; j++)
     {
-      edge_matrix[i*N +j] = -1;
+      edge_matrix[i*N +j] = EDGE_DOES_NOT_EXIST;
     }
   }
 
@@ -110,7 +106,7 @@ int * getGraph(int N, int M, int directed, int weighted, char ** node_list, bool
       {
         break;
       }
-      if ((i != j) && (edge_matrix[i*N + j] == -1)) // i.e., not yet changed
+      if ((i != j) && (!edgeExists(i, j, N, edge_matrix))) // i.e., not yet changed
       {
         char message_buffer [BUFFER_SIZE];
         sprintf(message_buffer, "Type 1 if there is an edge between node %d [%s] and %d [%s], otherwise type 0:", i+1, node_list[i], j+1, node_list[j]);
@@ -158,7 +154,14 @@ int * getGraph(int N, int M, int directed, int weighted, char ** node_list, bool
     printf("%s\t", node_list[i]);
     for (int j = 0; j < N; j++)
     {
-      printf("%d\t", edge_matrix[i*N + j]);
+      if (edgeExists(i, j, N, edge_matrix))
+      {
+        printf("%d\t", edge_matrix[i*N + j]);
+      }
+      else
+      {
+        printf("%s\t", "NA");
+      }
     }
     printf("\n");
   }
@@ -309,4 +312,18 @@ void deleteGraph(int N, int * edge_matrix, char ** node_list)
   }
   free(edge_matrix);
   free(node_list);
+}
+
+bool edgeExists(int i, int j, int N, int * edge_matrix)
+{
+  if (edge_matrix[i*N + j] == EDGE_DOES_NOT_EXIST)
+  {
+    return false;
+  }
+  return true;
+}
+
+void deleteEdge(int i, int j, int N, int * edge_matrix)
+{
+  edge_matrix[i*N + j] = EDGE_DOES_NOT_EXIST;
 }
