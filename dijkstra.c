@@ -25,6 +25,7 @@ void changeDistance(int key, int newDistance);
 int extractMinDistance(void);
 bool allNodesVisited(void);
 void printOptimalPaths(int curr_node);
+bool hasNegativeWeights(void);
 
 int main (void)
 {
@@ -33,7 +34,8 @@ int main (void)
   getParameters(&N, &M, &directed, &weighted);
   node_list = getNodeList(N);
   assert(node_list);
-  edge_matrix = getGraph(N, M, directed, weighted, node_list);
+  bool negativeEdgesOkay = false;
+  edge_matrix = getGraph(N, M, directed, weighted, node_list, negativeEdgesOkay);
   assert(edge_matrix);
   int sourcenode = getSourceNode(N, node_list);
 
@@ -47,7 +49,9 @@ int main (void)
 void Dijkstra(int sourcenode)
 {
   distances = newPriorityQueueFromEdgeMatrix(sourcenode); // Sets source distance to 0 and rest to infinity
+  assert(distances);
   previous = malloc(N * sizeof(int));
+  assert(previous);
   for (int i = 0; i < N; i++)
   {
     previous[i] = (i == sourcenode) ? sourcenode : -1; // Previous node in optimal path undefined
@@ -152,4 +156,16 @@ void printOptimalPaths(int curr_node)
     printf(" <= ");
     printOptimalPaths(previous[curr_node]);
   }
+}
+
+bool hasNegativeWeights(void)
+{
+  for (int i = 0; i < N*N; i++)
+  {
+    if (edge_matrix[i] < 0)
+    {
+      return false;
+    }
+  }
+  return true;
 }

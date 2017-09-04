@@ -38,7 +38,8 @@ int main (void)
   }
   node_list = getNodeList(N);
   assert(node_list);
-  edge_matrix = getGraph(N, M, directed, weighted, node_list);
+  bool negativeEdgesOkay = true;
+  edge_matrix = getGraph(N, M, directed, weighted, node_list, negativeEdgesOkay);
   assert(edge_matrix);
   int sourcenode = getSourceNode(N, node_list);
 
@@ -54,6 +55,7 @@ void Prim(int sourcenode)
   distances = newPriorityQueueFromEdgeMatrix(sourcenode); // Sets source distance to 0 and rest to infinity
   assert(distances);
   previous = malloc(N * sizeof(int));
+  assert(previous);
   for (int i = 0; i < N; i++)
   {
     previous[i] = (i == sourcenode) ? sourcenode : -1; // Previous node in optimal path undefined

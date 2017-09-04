@@ -16,14 +16,16 @@
 
 #define BUFFER_SIZE 0xFFF
 #define MAX_NUMBER_NODES 0xFF
-#define MAX_EDGE_WEIGHT 0xFF
+#define MIN_NEG_EDGE_WEIGHT -255
+#define MIN_NONNEG_EDGE_WEIGHT 0
+#define MAX_EDGE_WEIGHT 255
 #define NODE_NAME_MAX_LENGTH 32
 
 int declaredEdges;
 
 void getParameters(int * N_ptr, int * M_ptr, int * directed_ptr, int * weighted_ptr);
 char ** getNodeList(int M);
-int * getGraph(int N, int M, int directed, int weighted, char ** node_list);
+int * getGraph(int N, int M, int directed, int weighted, char ** node_list, bool negativeEdgesOkay);
 int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype);
 bool getInputString(char * message, unsigned int max_size, char * string_ptr);
 int getSourceNode(int N, char ** node_list);
@@ -84,7 +86,7 @@ char ** getNodeList(int N)
   return node_list;
 }
 
-int * getGraph(int N, int M, int directed, int weighted, char ** node_list)
+int * getGraph(int N, int M, int directed, int weighted, char ** node_list, bool negativeEdgesOkay)
 {
   int edge_matrix_size = N * N;
   int * edge_matrix = (int *) malloc(edge_matrix_size * sizeof(int));
@@ -118,7 +120,14 @@ int * getGraph(int N, int M, int directed, int weighted, char ** node_list)
           if (weighted)
           {
             sprintf(message_buffer, "Type the weight of the edge between node %d [%s] and %d [%s]:", i+1, node_list[i], j+1, node_list[j]);
-            weight = getInputInt(message_buffer, 0, MAX_EDGE_WEIGHT, "range");
+            if (negativeEdgesOkay)
+            {
+              weight = getInputInt(message_buffer, MIN_NEG_EDGE_WEIGHT, MAX_EDGE_WEIGHT, "range");
+            }
+            else
+            {
+              weight = getInputInt(message_buffer, MIN_NONNEG_EDGE_WEIGHT, MAX_EDGE_WEIGHT, "range");
+            }
           }
           edge_matrix[i*N + j] = weight;
           printf("[Edge %d of %d]: %s -> %s\n\n", ++declaredEdges, M, node_list[i], node_list[j]);
@@ -134,7 +143,7 @@ int * getGraph(int N, int M, int directed, int weighted, char ** node_list)
   {
     printf("You have declared %d of %d edges. Try again!\n\n", declaredEdges, M);
     free(edge_matrix);
-    edge_matrix = getGraph(N, M, directed, weighted, node_list);
+    edge_matrix = getGraph(N, M, directed, weighted, node_list, negativeEdgesOkay);
   }
 
   printf("\nEdge matrix for your graph:\n");
@@ -178,7 +187,7 @@ int getInputInt(char * message, int lowerbound, int upperbound, char * inputtype
   {
     printf("%s ", message);
     assert(fgets(input_buffer, BUFFER_SIZE, stdin) != NULL); // input to buffer
-    int sscanf_ret = sscanf(input_buffer, "%u%s", &ret, excess_buffer);
+    int sscanf_ret = sscanf(input_buffer, "%d%s", &ret, excess_buffer);
     switch (sscanf_ret)
     {
       case -1: // No input

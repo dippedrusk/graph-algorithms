@@ -37,7 +37,8 @@ int main (void)
  }
  node_list = getNodeList(N);
  assert(node_list);
- edge_matrix = getGraph(N, M, directed, weighted, node_list);
+ bool negativeEdgesOkay = true;
+ edge_matrix = getGraph(N, M, directed, weighted, node_list, negativeEdgesOkay);
  assert(edge_matrix);
 
  Kruskal();
