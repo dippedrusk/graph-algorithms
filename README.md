@@ -29,7 +29,7 @@ Then run them the regular way, e.g., `./dijsktra` or optionally with one of the 
     * Does not run with Dijkstra's, Prim's and Kruskal's for the reasons described above
 
 ## Time Complexity
-N = number of nodes, M = number of edges
+The graphs are represented with a O(N) list of node names and an O(N^2) edge matrix. This representation made sense because in a toy application like this, I expected to be dealing with denser and smaller graphs rather than large, sparse ones.
 
 * Graph input program: O(N^2)
 * Dijkstra's algorithm: O(N^2)
@@ -55,3 +55,5 @@ N = number of nodes, M = number of edges
   * Initializing distances and previous arrays: O(N)
   * Main loop executes O(N^3) times
   * The loop to check for negative cycles runs in O(N^2)
+
+As usual, N = number of nodes, M = number of edges.
