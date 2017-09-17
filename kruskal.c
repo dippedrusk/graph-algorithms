@@ -22,7 +22,7 @@ void Kruskal(void);
 int * makeUnionFindFromEdgeMatrix(void);
 int Find(int u);
 void Union(int u, int v);
-bool allNodesVisited(void);
+bool allEdgesVisited(void);
 void printOptimalPaths(int curr_node);
 
 int main (void)
@@ -59,7 +59,7 @@ void Kruskal(void)
     previous[i] = -1; // Previous node in optimal path undefined
   }
 
-  while(!allNodesVisited())
+  while(!allEdgesVisited())
   {
     int min_edge_weight = INFINITY;
     int min_i, min_j, i, j;
@@ -126,7 +126,7 @@ void Union(int u, int v)
   }
 }
 
-bool allNodesVisited(void)
+bool allEdgesVisited(void)
 {
   for (int i = 0; i < N; i++)
   {

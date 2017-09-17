@@ -1,6 +1,5 @@
 
-/* Header file
- * Implementation of Dijkstra's algorithm
+/* Graph input header file
  * August 28th, 2017
  */
 

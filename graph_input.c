@@ -1,5 +1,5 @@
 
-/* Graph input program
+/* Graph input source
  * Takes and validates an input graph and returns to any driver program that
  * calls it
  * August 27th, 2017

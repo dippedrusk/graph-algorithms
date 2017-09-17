@@ -3,8 +3,6 @@ SHELL = /bin/sh
 CC = gcc
 CFLAGS = -Wall
 
-# Could possibly refactor this Makefile at some stage..
-
 graph_headers = graph_input.h
 
 dijkstras_src = dijkstra.c graph_input.c
@@ -16,13 +14,26 @@ bellmanford_src = bellmanford.c graph_input.c
 all : dijkstra prim kruskal bellmanford
 
 dijkstra : $(dijkstras_src) $(graph_headers)
-	$(CC) $(CFLAGS) -o $@ $(dijkstras_src)
+	@echo "Compiling Dijkstra's code"
+	@$(CC) $(CFLAGS) -o $@ $(dijkstras_src)
 
 prim : $(prims_src) $(graph_headers)
-	$(CC) $(CFLAGS) -o $@ $(prims_src)
+	@echo "Compiling Prim's code"
+	@$(CC) $(CFLAGS) -o $@ $(prims_src)
 
 kruskal : $(kruskals_src) $(graph_headers)
-	$(CC) $(CFLAGS) -o $@ $(kruskals_src)
+	@echo "Compiling Kruskal's code"
+	@$(CC) $(CFLAGS) -o $@ $(kruskals_src)
 
 bellmanford : $(bellmanford_src) $(graph_headers)
-	$(CC) $(CFLAGS) -o $@ $(bellmanford_src)
+	@echo "Compiling Bellman-Ford code"
+	@$(CC) $(CFLAGS) -o $@ $(bellmanford_src)
+
+.PHONY : clean
+
+clean :
+	@echo "Removing all executables"
+	@rm -f dijkstra
+	@rm -f prim
+	@rm -f kruskal
+	@rm -f bellmanford
